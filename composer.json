@@ -1,0 +1,45 @@
+{
+  "name": "coff/php-w1-mqtt-broker",
+  "description": "One-Wire (1-wire) sensors broker for storing telemetry on MQTT broker",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Krzysztof Kubanek",
+      "email": "krzysztof.kubanek@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Coff\\W1MqttBroker\\": "src/",
+      "Coff\\W1MqttBroker\\Examples\\": "examples/"
+    }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/coff/php-datasource-interface.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/coff/php-sensor-interface.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/coff/php-w1-datasource.git"
+    }
+  ],
+  "require": {
+    "coff/php-datasource-interface": "0.1.*",
+    "coff/php-sensor-interface": "dev-master",
+    "coff/php-w1-datasource": "dev-master",
+    "coff/ticker": "2.1.*",
+    "pimple/pimple": "3.5.*",
+    "monolog/monolog": "^1.22",
+    "symfony/console": "^3.2",
+    "php-mqtt/client": "1.1.*"
+  },
+  "require-dev": {
+
+  }
+}
