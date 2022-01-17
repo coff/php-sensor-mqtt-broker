@@ -6,6 +6,7 @@ namespace Coff\W1MqttBroker\Broker;
 use Coff\DataSource\Exception\DataSourceException;
 use Coff\DataSource\W1\W1DataSource;
 use Coff\DataSource\W1\W1FileDataSource;
+use Coff\Max6675\Max6675DataSource;
 use Coff\Sensor\MqttSensor;
 use Coff\Ticker\CallableTick;
 use Coff\Ticker\Ticker;
@@ -44,6 +45,7 @@ class Broker
 
         $this->ticker->addTick(new CallableTick(Ticker::SECOND, 10, [$this, 'queryDevices']));
         $this->ticker->addTick(new CallableTick(Ticker::SECOND, 1, [$this, 'readReadings']));
+        $this->ticker->addTick(new CallableTick(Ticker::SECOND, 10, [$this, 'sendReadings']));
         $this->ticker->addTick(new CallableTick(Ticker::MINUTE, 1, [$this, 'devicesDiscovery']));
 
         // initial devices discovery
@@ -123,16 +125,21 @@ class Broker
 
         /**
          * @var string $key
-         * @var W1DataSource $dataSource
          */
         foreach ($this->sensors as $key => $sensor) {
-            try {
-                $stream = $sensor
-                    ->getDataSource()
-                    ->request()
-                    ->getStream();
 
-                $this->dataSourceStreams[$key] = $stream;
+            try {
+                if ($sensor->getDataSource() instanceof W1FileDataSource) {
+                    $stream = $sensor
+                        ->getDataSource()
+                        ->request()
+                        ->getStream();
+
+                    $this->dataSourceStreams[$key] = $stream;
+                } elseif ($sensor->getDataSource() instanceof Max6675DataSource) {
+                    $sensor->update();
+                }
+
             } catch (DataSourceException $e) {
                 $this->logger->log(LogLevel::ALERT, $e->getMessage(), $e->getCode());
             }
@@ -142,45 +149,61 @@ class Broker
         $this->lastQueryTime = time();
     }
 
-    public function readReadings() {
-
+    public function readReadings()
+    {
         $streams = $this->dataSourceStreams; $w=null; $o=null;
 
         if ($this->dataSourceStreams && 0 < stream_select($streams, $w, $o, 0, $this->sleepTime)) {
-            try {
 
-                $this->mqttClient->connect();
+            foreach ($this->dataSourceStreams as $key => $stream) {
+                $sensor = $this->sensors[$key];
+                $sensor
+                    ->update();
 
-                foreach ($this->dataSourceStreams as $key => $stream) {
-                    $sensor = $this->sensors[$key];
-                    $sensor
-                        ->update();
+                $this->logger->info('Got answer from ' . $key, [$sensor->getValue()]);
 
-                    $this->logger->info('Got answer from ' . $key, [$sensor->getValue()]);
+                if (false === is_resource($stream)) {
+                    unset($this->dataSourceStreams[$key]);
 
-                    if (false === is_resource($stream)) {
-                        unset($this->dataSourceStreams[$key]);
-
-                        if (!$this->dataSourceStreams) {
-                            $this->allCollected = true;
-                        }
+                    if (!$this->dataSourceStreams) {
+                        $this->logger->info('Collecting answers completed');
+                        $this->allCollected = true;
                     }
-
-                    $this->mqttClient->publish($sensor->getMqttValueTopic(), $sensor->getValue());
-                    $this->mqttClient->publish($sensor->getMqttTimestampTopic(), date('Y-m-d H:i:s'));
                 }
 
-                if ($this->tempStampSignature) {
-                    $this->mqttClient->publish($this->tempStampSignature, date('Y-m-d H:i:s'));
-                }
-
-                $this->mqttClient->disconnect();
-            } catch (MqttClientException $e) {
-                $this->logger->alert('Mqtt broker connection failed');
-
-                // try another time
-                return;
             }
+
+        }
+    }
+
+    public function sendReadings()
+    {
+        $stamp = date('Y-m-d H:i:s');
+
+        $this->logger->info('Connecting MQTT instance to send data...');
+
+        try {
+            $this->mqttClient->connect();
+
+            /**
+             * @var Coff\Sensor\MqttSensor
+             */
+            foreach ($this->sensors as $key => $sensor) {
+                $this->logger->debug('Publishing MQTT sensor data for '. $sensor->getMqttBaseTopic());
+                $this->mqttClient->publish($sensor->getMqttValueTopic(), $sensor->getValue());
+                $this->mqttClient->publish($sensor->getMqttTimestampTopic(), $stamp);
+            }
+
+            if ($this->tempStampSignature) {
+                $this->mqttClient->publish($this->tempStampSignature, $stamp);
+            }
+
+            $this->mqttClient->disconnect();
+        } catch (MqttClientException $e) {
+            $this->logger->alert('Mqtt broker connection failed');
+
+            // try another time
+            return;
         }
     }
 

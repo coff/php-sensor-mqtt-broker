@@ -27,10 +27,15 @@
     {
       "type": "vcs",
       "url": "https://github.com/coff/php-w1-datasource.git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/coff/php-spi-max6675.git"
     }
   ],
   "require": {
     "coff/php-datasource-interface": "0.1.*",
+    "coff/php-spi-max6675": "dev-master",
     "coff/php-sensor-interface": "dev-master",
     "coff/php-w1-datasource": "dev-master",
     "coff/ticker": "2.1.*",

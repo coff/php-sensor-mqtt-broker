@@ -2,12 +2,17 @@
 
 
 use Coff\DataSource\W1\W1FileDataSource;
+use Coff\Max6675\Max6675DataSource;
 use Coff\W1MqttBroker\Command\Command;
 use Coff\W1MqttBroker\Sensor\DS18B20Sensor;
+use Coff\W1MqttBroker\Sensor\Max6675Sensor;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\StreamOutput;
+use Volantus\Pigpio\Client;
+use Volantus\Pigpio\Network\Socket;
+use Volantus\Pigpio\SPI\RegularSpiDevice;
 
 $container['mqtt:clientId'] = function ($c) {
     return 'w1-mqtt-broker';
@@ -15,6 +20,10 @@ $container['mqtt:clientId'] = function ($c) {
 
 $container['w1_system:path'] = function ($c) {
     return '/sys/devices/w1_bus_master1';
+};
+
+$container['client:pigpio'] = function($c) {
+    return new Client(new Socket('127.0.0.1', 8888));
 };
 
 $container['sensors:topics'] = function ($c) {
@@ -32,6 +41,9 @@ $container['sensors:topics'] = function ($c) {
 $container['sensors'] = function ($c) {
     DS18B20Sensor::$defaultMqttTimetampSuffix = 'timestamp';
     DS18B20Sensor::$defaultMqttValueSuffix = 'temp';
+    Max6675Sensor::$defaultMqttTimetampSuffix = 'timestamp';
+    Max6675Sensor::$defaultMqttValueSuffix = 'temp';
+
     $path = $c['w1_system:path'];
     $sensors = [];
 
@@ -40,6 +52,13 @@ $container['sensors'] = function ($c) {
         $sensors[$dsId] = new DS18B20Sensor($dataSource);
         $sensors[$dsId]->setMqttBaseTopic($topic);
     }
+
+    $dataSource = new Max6675DataSource();
+    $device = new RegularSpiDevice($c['client:pigpio'], 1, 32000);
+    $device->open();
+    $dataSource->setSpiDevice($device);
+    $sensors['thermocouple1'] = new Max6675Sensor($dataSource);
+    $sensors['thermocouple1']->setMqttBaseTopic('home/heating/boiler/exhaust');
 
     return $sensors;
 };
