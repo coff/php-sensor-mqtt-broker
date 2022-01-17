@@ -1,9 +1,9 @@
 <?php
 
-namespace Coff\W1MqttBroker\Command;
+namespace Coff\SensorMqttBroker\Command;
 
 
-use Coff\W1MqttBroker\Application\W1MqttBrokerApplication;
+use Coff\SensorMqttBroker\Application\SensorMqttBrokerApplication;
 use Pimple\Container;
 
 /**
@@ -21,7 +21,7 @@ abstract class Command extends \Symfony\Component\Console\Command\Command
      * @return Container
      */
     public function getContainer() {
-        /** @var W1MqttBrokerApplication $app */
+        /** @var SensorMqttBrokerApplication $app */
         $app = $this->getApplication();
 
         return $app->getContainer();

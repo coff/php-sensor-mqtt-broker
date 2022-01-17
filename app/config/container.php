@@ -3,9 +3,9 @@
 
 use Coff\DataSource\W1\W1FileDataSource;
 use Coff\Max6675\Max6675DataSource;
-use Coff\W1MqttBroker\Command\Command;
-use Coff\W1MqttBroker\Sensor\DS18B20Sensor;
-use Coff\W1MqttBroker\Sensor\Max6675Sensor;
+use Coff\SensorMqttBroker\Command\Command;
+use Coff\SensorMqttBroker\Sensor\DS18B20Sensor;
+use Coff\SensorMqttBroker\Sensor\Max6675Sensor;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -81,7 +81,7 @@ $container['broker:daemon'] = function($c) {
     /** @var InputInterface $input */
     $input = $c['interface:input'];
 
-    $server = new Coff\W1MqttBroker\Broker\Broker();
+    $server = new Coff\SensorMqttBroker\Broker\Broker();
 
     $server
         ->setLogger($c['logger'])

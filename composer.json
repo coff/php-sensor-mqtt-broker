@@ -11,8 +11,8 @@
   ],
   "autoload": {
     "psr-4": {
-      "Coff\\W1MqttBroker\\": "src/",
-      "Coff\\W1MqttBroker\\Examples\\": "examples/"
+      "Coff\\SensorMqttBroker\\": "src/",
+      "Coff\\SensorMqttBroker\\Examples\\": "examples/"
     }
   },
   "repositories": [

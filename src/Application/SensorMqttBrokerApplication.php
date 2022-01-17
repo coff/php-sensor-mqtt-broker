@@ -1,11 +1,11 @@
 <?php
 
-namespace Coff\W1MqttBroker\Application;
+namespace Coff\SensorMqttBroker\Application;
 
 use Pimple\Container;
 use Symfony\Component\Console\Application;
 
-class W1MqttBrokerApplication extends Application
+class SensorMqttBrokerApplication extends Application
 {
     protected $container;
 

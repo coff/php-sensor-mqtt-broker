@@ -1,8 +1,8 @@
 <?php
 
-namespace Coff\W1MqttBroker\Command;
+namespace Coff\SensorMqttBroker\Command;
 
-use Coff\W1MqttBroker\Broker\Broker;
+use Coff\SensorMqttBroker\Broker\Broker;
 use Pimple\Container;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;

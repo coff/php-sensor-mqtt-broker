@@ -1,6 +1,6 @@
 <?php
 
-namespace Coff\W1MqttBroker\Broker;
+namespace Coff\SensorMqttBroker\Broker;
 
 
 use Coff\DataSource\Exception\DataSourceException;
@@ -10,7 +10,7 @@ use Coff\Max6675\Max6675DataSource;
 use Coff\Sensor\MqttSensor;
 use Coff\Ticker\CallableTick;
 use Coff\Ticker\Ticker;
-use Coff\W1MqttBroker\Sensor\UnknownW1Sensor;
+use Coff\SensorMqttBroker\Sensor\UnknownW1Sensor;
 use PhpMqtt\Client\Exceptions\MqttClientException;
 use PhpMqtt\Client\MqttClient;
 use Psr\Log\LogLevel;

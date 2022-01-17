@@ -1,6 +1,6 @@
 <?php
 
-namespace Coff\W1MqttBroker\Sensor;
+namespace Coff\SensorMqttBroker\Sensor;
 
 use Coff\DataSource\DataSourceInterface;
 use Coff\DataSource\W1\W1FileDataSource;
